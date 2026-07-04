@@ -1,16 +1,29 @@
 function displayWeather(response) {
   console.log("API Response:", response);
   if (response.data && response.data.temperature) {
-    let temperature = Math.round(response.data.temperature.current);
     let city = response.data.city;
+    let temperature = Math.round(response.data.temperature.current);
+    let description = response.data.condition.description;
+    let humidity = response.data.temperature.humidity;
+    let windSpeed = Math.round(response.data.wind.speed);
+    let iconUrl = response.data.condition.icon_url;
 
     let cityElement = document.querySelector("#current-city");
     let temperatureValueElement = document.querySelector(
-      ".current-temperature-value"
+      "#current-temperature-value",
     );
+    let descriptionElement = document.querySelector("#weather-description");
+    let humidityElement = document.querySelector("#humidity-value");
+    let windElement = document.querySelector("#wind-speed-value");
+    let iconElement = document.querySelector("#weather-icon");
 
     cityElement.innerHTML = city;
     temperatureValueElement.innerHTML = temperature;
+    descriptionElement.innerHTML = description;
+    humidityElement.innerHTML = humidity;
+    windElement.innerHTML = windSpeed;
+
+    iconElement.innerHTML = `<img src="${iconUrl}" class="current-temperature-icon" />`;
   } else {
     alert("City not found or API error! Check console.");
   }
