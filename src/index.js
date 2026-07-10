@@ -24,6 +24,8 @@ function displayWeather(response) {
     windElement.innerHTML = windSpeed;
 
     iconElement.innerHTML = `<img src="${iconUrl}" class="current-temperature-icon" />`;
+
+    getForecast(city);
   } else {
     alert("City not found or API error! Check console.");
   }
@@ -45,12 +47,8 @@ function formatDate(date) {
   let hours = date.getHours();
   let day = date.getDay();
 
-  if (minutes < 10) {
-    minutes = `0${minutes}`;
-  }
-  if (hours < 10) {
-    hours = `0${hours}`;
-  }
+  if (minutes < 10) minutes = `0${minutes}`;
+  if (hours < 10) hours = `0${hours}`;
 
   let days = [
     "Sunday",
@@ -61,9 +59,13 @@ function formatDate(date) {
     "Friday",
     "Saturday",
   ];
+  return `${days[day]} ${hours}:${minutes}`;
+}
 
-  let formattedDay = days[day];
-  return `${formattedDay} ${hours}:${minutes}`;
+function formatForecastDay(timestamp) {
+  let date = new Date(timestamp * 1000);
+  let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return days[date.getDay()];
 }
 
 function searchCity(city) {
@@ -76,6 +78,51 @@ function searchCity(city) {
   currentDateElement.innerHTML = formatDate(currentDate);
 
   axios.get(apiUrl).then(displayWeather);
+}
+
+function getForecast(city) {
+  let apiKey = "537bt8538b7390o44ab0546f79bedf4a";
+  let units = "metric";
+  let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=${units}`;
+
+  axios.get(apiUrl).then(displayForecast);
+}
+
+function displayForecast(response) {
+  let forecastElement = document.querySelector("#forecast");
+  let forecastHtml = "";
+
+  let forecastDays = response.data.daily;
+
+  forecastDays.forEach(function (day, index) {
+    if (index > 0 && index < 6) {
+      let maxTemp = Math.round(day.temperature.maximum);
+      let minTemp = Math.round(day.temperature.minimum);
+      let iconUrl = day.condition.icon_url;
+      let dayName = formatForecastDay(day.time);
+
+      let maxColorClass = "";
+      if (maxTemp > 25) {
+        maxColorClass = "hot";
+      } else {
+        maxColorClass = "cold";
+      }
+
+      forecastHtml += `
+        <div class="weather-forecast-day">
+          <div class="weather-forecast-date">${dayName}</div>
+          <img src="${iconUrl}" class="weather-forecast-icon" />
+          <div class="weather-forecast-temperatures">
+            <!-- Ось сюди додаємо ${maxColorClass} -->
+            <span class="weather-forecast-temperature-max ${maxColorClass}"><strong>${maxTemp}°</strong></span>
+            <span class="weather-forecast-temperature-min">${minTemp}°</span>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  forecastElement.innerHTML = forecastHtml;
 }
 
 let searchForm = document.querySelector("#search-form");
